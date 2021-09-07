@@ -1,11 +1,9 @@
-import {
-  Renderer,
-  Triangle,
-  Program,
-  Mesh,
-  Texture,
-  Vec2
-} from "https://unpkg.com/ogl@0.0.74/src/index.mjs";
+import { Renderer } from "https://unpkg.com/ogl@0.0.74/src/core/Renderer.js";
+import { Program } from "https://unpkg.com/ogl@0.0.74/src/core/Program.js";
+import { Texture } from "https://unpkg.com/ogl@0.0.74/src/core/Texture.js";
+import { Triangle } from "https://unpkg.com/ogl@0.0.74/src/extras/Triangle.js";
+import { Mesh } from "https://unpkg.com/ogl@0.0.74/src/core/Mesh.js";
+import { Vec2 } from "https://unpkg.com/ogl@0.0.74/src/math/Vec2.js";
 
 class WebGLCarouselItem {
   constructor(carousel, element) {
