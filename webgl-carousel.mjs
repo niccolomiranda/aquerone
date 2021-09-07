@@ -226,3 +226,5 @@ class WebGLCarousel extends Rect {
     this.renderer.setSize(this.width, this.height);
   }
 }
+
+export { WebGLCarousel }
