@@ -20,7 +20,8 @@ class WebGLCarouselItem {
     this.img.crossOrigin = "anonymous";
     this.onLoad = this.onLoad.bind(this);
     this.img.addEventListener("load", this.onLoad);
-    this.img.src = this.element.querySelector("img").getAttribute("src");
+    //this.img.src = this.element.querySelector("img").getAttribute("src");
+    this.img.src = "https://images.unsplash.com/photo-1630951633284-f35d46350ac3?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
   }
 
   onLoad() {
