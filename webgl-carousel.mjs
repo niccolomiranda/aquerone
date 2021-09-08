@@ -199,7 +199,7 @@ class WebGLCarousel extends Rect {
 
   async onPrev() {
     await gsap.to(this.program.uniforms.uProgress, {
-      value: 0,
+      value: 1,
       duration: 1.5,
       ease: "expo.out"
     });
