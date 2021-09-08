@@ -19,8 +19,7 @@ class WebGLCarouselItem {
     this.onLoad = this.onLoad.bind(this);
     this.img.addEventListener("load", this.onLoad);
     const src = this.element.querySelector("img").getAttribute("src");
-    `https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=${src}`;
-    this.img.src = src;
+    this.img.src = `https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=${src}`;
   }
 
   onLoad() {
