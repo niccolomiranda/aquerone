@@ -69,9 +69,6 @@ class WebGLCarousel extends Rect {
         uProgress: {
           value: 0
         },
-        uDelayedProgress: {
-          value: 0
-        },
         uTexture1: {
           value: this.items[0].texture
         },
@@ -123,7 +120,6 @@ class WebGLCarousel extends Rect {
         uniform vec2 uRatio1;
         uniform vec2 uRatio2;
         uniform float uProgress;
-        uniform float uDelayedProgress;
 
         varying vec2 vUv;
         varying vec2 vUv1;
@@ -190,30 +186,33 @@ class WebGLCarousel extends Rect {
   //   this.nextButton.addEventListener("click", this.onNext);
   // }
 
-  onPrev() {
-    gsap.to(this.program.uniforms.uProgress, {
-      value: 0,
-      duration: 1.5,
-      ease: "expo.out"
-    });
-    gsap.to(this.program.uniforms.uDelayedProgress, {
-      value: 0,
-      duration: 1.5,
-      ease: "expo.in"
-    });
+  switch() {
+    this.program.uniforms.uProgress.value = 0;
+    const tempTexture = this.program.uniforms.uTexture1;
+    this.program.uniforms.uTexture1 = this.program.uniforms.uTexture2;
+    this.program.uniforms.uTexture2 = tempTexture;
+
+    const tempRatio = this.program.uniforms.uRatio1;
+    this.program.uniforms.uRatio1 = this.program.uniforms.uRatio2;
+    this.program.uniforms.uRatio2 = tempRatio;
   }
 
-  onNext() {
-    gsap.to(this.program.uniforms.uProgress, {
+  async onPrev() {
+    await gsap.to(this.program.uniforms.uProgress, {
+      value: 0,
+      duration: 1.5,
+      ease: "expo.out"
+    });
+    this.switch();
+  }
+
+  async onNext() {
+    await gsap.to(this.program.uniforms.uProgress, {
       value: 1,
       duration: 1.5,
       ease: "expo.out"
     });
-    gsap.to(this.program.uniforms.uDelayedProgress, {
-      value: 1,
-      duration: 1.5,
-      ease: "expo.in"
-    });
+    this.switch();
   }
 
   onResize(e) {
