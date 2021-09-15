@@ -47,11 +47,9 @@ class Hero extends Rect {
       this.texture.image = this.image;
     });
 
-    this.image.src = "./alpha-extended.png";
-
-    // this.image.src =
-    //   "https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=" +
-    //   "https://global-uploads.webflow.com/60995478590a43cbebbd2ae9/613b38aae49959bce35a6006_alpha.png";
+    this.image.src =
+      "https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=" +
+      "https://uploads-ssl.webflow.com/60995478590a43cbebbd2ae9/61427cafe8980783ef2ce3a7_alpha-extended.png";
 
     const [r, g, b] = hexToRGB("#F4BF59");
 
