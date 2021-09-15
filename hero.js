@@ -122,7 +122,7 @@ class Hero extends Rect {
           vec2 turbulence = waves(vUvRatio);
           float a = texture2D(uMask,turbulence).r;
           vec3 color = mix(uColor + vec3(0.2),uColor, vUv.y);
-          gl_FragColor = vec4(vec3(1.,0.,0.),a);
+          gl_FragColor = vec4(color,a);
         }
       `
     });
