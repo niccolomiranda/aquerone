@@ -47,9 +47,11 @@ class Hero extends Rect {
       this.texture.image = this.image;
     });
 
-    this.image.src =
-      "https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=" +
-      "https://global-uploads.webflow.com/60995478590a43cbebbd2ae9/613b38aae49959bce35a6006_alpha.png";
+    this.image.src = "./alpha-extended.png";
+
+    // this.image.src =
+    //   "https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=" +
+    //   "https://global-uploads.webflow.com/60995478590a43cbebbd2ae9/613b38aae49959bce35a6006_alpha.png";
 
     const [r, g, b] = hexToRGB("#F4BF59");
 
@@ -66,78 +68,79 @@ class Hero extends Rect {
         },
         uTime: {
           value: 0
+        },
+        uOffset: {
+          value: 0
         }
       },
       vertex: `
-      attribute vec2 position;
-      attribute vec2 uv;
+        attribute vec2 position;
+        attribute vec2 uv;
 
-      uniform vec2 uRatio;
+        uniform vec2 uRatio;
+        uniform float uOffset;
 
-      varying vec2 vUv;
-      varying vec2 vUvRatio;
+        varying vec2 vUv;
+        varying vec2 vUvRatio;
 
-      float map(float value, float min1, float max1, float min2, float max2) {
-        return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
-      }
+        float map(float value, float min1, float max1, float min2, float max2) {
+          return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+        }
 
-      void main() {
-        vUv = uv;
-        vUvRatio = vec2(
-          map(uv.x, 0.0, 1.0, 0.5 - uRatio.x / 2.0, 0.5 + uRatio.x / 2.0),
-          map(uv.y, 0.0, 1.0, 0.5 - uRatio.y / 2.0, 0.5 + uRatio.y / 2.0)
-        );
-
-        gl_Position = vec4(position, 0., 1.);
-      }
+        void main() {
+          vUv = uv;
+          vUvRatio = vec2(
+            map(uv.x, 0.0, 1.0, 0.5 - uRatio.x / 2.0, 0.5 + uRatio.x / 2.0),
+            map(uv.y + uOffset, 0.0, 1.0, 0.5 - uRatio.y / 2.0, 0.5 + uRatio.y / 2.0)
+          );
+          gl_Position = vec4(position, 0., 1.);
+        }
       `,
       fragment: `
-      precision highp float;
+        precision highp float;
+        varying vec2 vUv;
+        varying vec2 vUvRatio;
+        uniform sampler2D uMask;
+        uniform vec3 uColor;
+        uniform float uTime;
 
-      varying vec2 vUv;
-      varying vec2 vUvRatio;
+        float wave(float x,float freq, float speed){
+          return sin(x*freq+((uTime*(3.1415/2.0))*speed));
+        }
 
-      uniform sampler2D uMask;
-      uniform vec3 uColor;
-      uniform float uTime;
+        vec2 waves(vec2 pos){
+          vec2 waves=vec2(
+            wave(pos.y,190.0,0.35) * 0.001,
+            wave(pos.x,100.0,0.4)  * 0.001
+          );
+          return pos+waves;
+        }
 
-      float wave(float x,float freq, float speed){
-        return sin(x*freq+((uTime*(3.1415/2.0))*speed));
-      }
-      vec2 waves(vec2 pos){
-      
-      //   vec2 intensity=vec2(2.0,1.0) * vUvRatio *vec2(0.001);
-      
-        vec2 waves=vec2(
-          wave(pos.y,190.0,0.35) * 0.001,
-          wave(pos.x,100.0,0.4)  * 0.001
-        );
-        return pos+waves;
-      }
-
-      void main() {
-
-        
-
-        float frequency=100.0;
-        float amplitude=0.003;
-        float distortion=sin(vUv.x*frequency+((uTime*(3.1415/2.0))*0.35));
-
-        // float distortion=sin(vUv.x*frequency+ (uTime*(3.1415/2.0)) *0.5 )*amplitude;
-
-        vec2 turbulence = waves(vUvRatio);
-
-        float a = texture2D(uMask,turbulence).r;
-
-        vec3 color = mix(uColor + vec3(0.2),uColor, vUv.y);
-
-        gl_FragColor = vec4(color,a);
-      }
+        void main() {
+          float frequency=100.0;
+          float amplitude=0.003;
+          float distortion=sin(vUv.x*frequency+((uTime*(3.1415/2.0))*0.35));
+          // float distortion=sin(vUv.x*frequency+ (uTime*(3.1415/2.0)) *0.5 )*amplitude;
+          vec2 turbulence = waves(vUvRatio);
+          float a = texture2D(uMask,turbulence).r;
+          vec3 color = mix(uColor + vec3(0.2),uColor, vUv.y);
+          gl_FragColor = vec4(vec3(1.,0.,0.),a);
+        }
       `
     });
     this.program = program;
 
+    // const scene = new Transform(gl);
+
     const mesh = new Mesh(gl, { geometry, program });
+    // mesh.setParent(scene);
+    this.mesh = mesh;
+
+    // this.mesh.position.set(0, -1000, 0);
+
+    // const camera = new Camera(gl);
+    // camera.position.z = 1;
+    // this.camera = camera;
 
     requestAnimationFrame(update);
     function update(t) {
@@ -146,11 +149,21 @@ class Hero extends Rect {
       program.uniforms.uTime.value += 1;
 
       renderer.render({ scene: mesh });
+      // renderer.render({ scene, camera });
     }
   }
 
   onResize(e) {
     super.onResize(e);
+
+    // this.mesh.scale.set(this.width, this.height, 1);
+
+    // this.camera.orthographic({
+    //   top: this.height / 2,
+    //   bottom: this.height / -2,
+    //   left: this.width / -2,
+    //   right: this.width / 2
+    // });
 
     this.renderer.setSize(this.width, this.height);
 
@@ -158,8 +171,6 @@ class Hero extends Rect {
   }
 
   setColor(hex) {
-    console.log(this.program.uniforms.uColor.value);
-
     const rgb = hexToRGB(hex);
     rgb.ease = "power4.out";
 
