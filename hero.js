@@ -15,7 +15,7 @@ class Hero extends Rect {
 
   computeRatio() {
     const naturalWidth = 1920;
-    const naturalHeight = 1080;
+    const naturalHeight = 1174;
 
     this.naturalRatio = naturalWidth / naturalHeight;
 
