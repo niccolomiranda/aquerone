@@ -13,7 +13,12 @@ class WebGLCarouselItem {
 
     this.ratio = new Vec2(1, 1);
 
-    this.texture = new Texture(this.carousel.renderer.gl);
+    const gl = this.carousel.renderer.gl;
+    this.texture = new Texture(gl, {
+      minFilter: gl.LINEAR,
+      wrapS: gl.CLAMP_TO_EDGE,
+      wrapT: gl.CLAMP_TO_EDGE
+    });
     this.img = new Image();
     this.img.crossOrigin = "anonymous";
     this.onLoad = this.onLoad.bind(this);
@@ -52,7 +57,7 @@ class WebGLCarousel extends Rect {
   init() {
     super.init();
 
-    const renderer = new Renderer();
+    const renderer = new Renderer({ dpr: window.devicePixelRatio });
     this.renderer = renderer;
     const gl = renderer.gl;
     this.element.appendChild(gl.canvas);
@@ -85,19 +90,15 @@ class WebGLCarousel extends Rect {
       vertex: `
         attribute vec2 position;
         attribute vec2 uv;
-
         varying vec2 vUv;
         varying vec2 vUv1;
         varying vec2 vUv2;
         varying vec2 vPosition;
-
         uniform vec2 uRatio1;
         uniform vec2 uRatio2;
-
         float map(float value, float min1, float max1, float min2, float max2) {
           return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
         }
-
         void main() {
           vPosition = position;
           vUv = uv;
@@ -114,47 +115,37 @@ class WebGLCarousel extends Rect {
         `,
       fragment: `
         precision highp float;
-
         uniform sampler2D uTexture1;
         uniform sampler2D uTexture2;
         uniform vec2 uRatio1;
         uniform vec2 uRatio2;
         uniform float uProgress;
-
         varying vec2 vUv;
         varying vec2 vUv1;
         varying vec2 vUv2;
         varying vec2 vPosition;
-
         const float smoothness = 0.5;
         const vec2 center = vec2(0.5, 0.5);
         const vec2 direction = vec2(1.0, -0.8);
-
         float circle(in vec2 _st, in float _radius){
           vec2 dist = _st-vec2(0.5);
           return 1.-smoothstep(_radius-(_radius*0.01),
                                 _radius+(_radius*0.01),
                                 dot(dist,dist)*4.0);
         } 
-
         void main() {
           vec2 uv = vUv;
           uv.y += 0.15 * uProgress;
-
           float dist = 1. - distance(vUv, vec2(.5, .5));
           vec4 textureOne = texture2D(uTexture1, vUv1 * (1. - (dist * uProgress)));
           vec4 textureTwo = texture2D(uTexture2, vUv2 * (1. - (dist * (1. - uProgress))));
-
           float PI = 3.1415;
           float etalement = 3. + (uProgress * 5.);
           float centerSin = etalement / 2.;
           float st = ((vUv.y - 1. + centerSin) / etalement);
-
           float d = sin(st * PI);
           float t = step(vUv.x + (1.-((uProgress - 0.1) * 1.2)), d );
-
           vec4 color = mix(textureTwo, textureOne, 1. - t);
-
           gl_FragColor = color;
         }
         `
@@ -235,4 +226,4 @@ class WebGLCarousel extends Rect {
   }
 }
 
-export { WebGLCarousel }
+export { WebGLCarousel };
