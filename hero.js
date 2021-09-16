@@ -33,14 +33,21 @@ class Hero extends Rect {
   init() {
     super.init();
 
-    const renderer = new Renderer({ alpha: true });
+    const renderer = new Renderer({
+      alpha: true,
+      dpr: window.devicePixelRatio
+    });
     this.renderer = renderer;
     const gl = renderer.gl;
     this.element.appendChild(gl.canvas);
     const geometry = new Triangle(gl);
 
     this.ratio = new Vec2(1, 1);
-    this.texture = new Texture(gl);
+    this.texture = new Texture(gl, {
+      minFilter: gl.LINEAR,
+      wrapS: gl.CLAMP_TO_EDGE,
+      wrapT: gl.CLAMP_TO_EDGE
+    });
     this.image = new Image();
     this.image.crossOrigin = "anonymous";
     this.image.addEventListener("load", () => {
@@ -74,17 +81,13 @@ class Hero extends Rect {
       vertex: `
         attribute vec2 position;
         attribute vec2 uv;
-
         uniform vec2 uRatio;
         uniform float uOffset;
-
         varying vec2 vUv;
         varying vec2 vUvRatio;
-
         float map(float value, float min1, float max1, float min2, float max2) {
           return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
         }
-
         void main() {
           vUv = uv;
           vUvRatio = vec2(
@@ -101,11 +104,9 @@ class Hero extends Rect {
         uniform sampler2D uMask;
         uniform vec3 uColor;
         uniform float uTime;
-
         float wave(float x,float freq, float speed){
           return sin(x*freq+((uTime*(3.1415/2.0))*speed));
         }
-
         vec2 waves(vec2 pos){
           vec2 waves=vec2(
             wave(pos.y,190.0,0.35) * 0.001,
@@ -113,7 +114,6 @@ class Hero extends Rect {
           );
           return pos+waves;
         }
-
         void main() {
           float frequency=100.0;
           float amplitude=0.003;
