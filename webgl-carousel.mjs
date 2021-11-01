@@ -6,18 +6,20 @@ import { Mesh } from "https://unpkg.com/ogl@0.0.74/src/core/Mesh.js";
 import { Vec2 } from "https://unpkg.com/ogl@0.0.74/src/math/Vec2.js";
 
 class WebGLCarouselItem {
-  constructor(carousel, element) {
+  constructor(carousel, element, heightOffset = 0) {
     this.element = element;
 
     this.carousel = carousel;
 
     this.ratio = new Vec2(1, 1);
 
+    this.heightOffset = heightOffset;
+
     const gl = this.carousel.renderer.gl;
     this.texture = new Texture(gl, {
       minFilter: gl.LINEAR,
       wrapS: gl.CLAMP_TO_EDGE,
-      wrapT: gl.CLAMP_TO_EDGE
+      wrapT: gl.CLAMP_TO_EDGE,
     });
     this.img = new Image();
     this.img.crossOrigin = "anonymous";
@@ -43,15 +45,18 @@ class WebGLCarouselItem {
 
     const w = ratio > this.naturalRatio ? width : height * this.naturalRatio;
     const h = w / this.naturalRatio;
+
+    // Fix for gap issue 1/11/2021
     this.ratio.x = width / w;
-    this.ratio.y = height / h;
+    this.ratio.y = height / h + this.heightOffset;
   }
 }
 
 class WebGLCarousel extends Rect {
-  constructor(element) {
+  constructor(element, heightOffset = 0) {
     super(element);
     this.element = element;
+    this.heightOffset = heightOffset;
   }
 
   init() {
@@ -64,7 +69,7 @@ class WebGLCarousel extends Rect {
     const geometry = new Triangle(gl);
 
     this.items = [
-      ...this.element.querySelectorAll(".webgl-carousel__item")
+      ...this.element.querySelectorAll(".webgl-carousel__item"),
     ].map((element) => new WebGLCarouselItem(this, element));
 
     // https://gl-transitions.com/editor/directionalwarp?direction=1,-0.8
@@ -72,20 +77,20 @@ class WebGLCarousel extends Rect {
     const program = new Program(gl, {
       uniforms: {
         uProgress: {
-          value: 0
+          value: 0,
         },
         uTexture1: {
-          value: this.items[0].texture
+          value: this.items[0].texture,
         },
         uTexture2: {
-          value: this.items[1].texture
+          value: this.items[1].texture,
         },
         uRatio1: {
-          value: this.items[0].ratio
+          value: this.items[0].ratio,
         },
         uRatio2: {
-          value: this.items[1].ratio
-        }
+          value: this.items[1].ratio,
+        },
       },
       vertex: `
         attribute vec2 position;
@@ -148,7 +153,7 @@ class WebGLCarousel extends Rect {
           vec4 color = mix(textureTwo, textureOne, 1. - t);
           gl_FragColor = color;
         }
-        `
+        `,
     });
     this.program = program;
 
@@ -193,12 +198,12 @@ class WebGLCarousel extends Rect {
     await gsap.fromTo(
       this.program.uniforms.uProgress,
       {
-        value: 1
+        value: 1,
       },
       {
         value: 0,
         duration: 1.5,
-        ease: "expo.out"
+        ease: "expo.out",
       }
     );
   }
@@ -210,7 +215,7 @@ class WebGLCarousel extends Rect {
       {
         value: 1,
         duration: 1.5,
-        ease: "expo.out"
+        ease: "expo.out",
       }
     );
     this.switch();
@@ -222,7 +227,8 @@ class WebGLCarousel extends Rect {
 
     this.items.forEach((item) => item.onResize());
 
-    this.renderer.setSize(this.width, this.height);
+    // Fix for gap issue 1/11/2021
+    this.renderer.setSize(this.width, this.height + this.heightOffset);
   }
 }
 
